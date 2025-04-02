@@ -18,6 +18,18 @@ class Ball{
     {
        DrawCircle(x, y, radius, WHITE);
     }
+    // this function sucks
+    void CollisionDetection(Rectangle paddle)
+    {
+        if (CheckCollisionCircleRec(Vector2{x, y}, radius, Rectangle{paddle.x, paddle.y, paddle.width, paddle.height}) && x >= paddle.width -5)
+        {
+            speedX *= -1;
+        }
+        else if (CheckCollisionCircleRec(Vector2{x, y}, radius, Rectangle{paddle.x, paddle.y, paddle.width, paddle.height}) && x >= screenWidth - paddle.width +5)
+        {
+            speedX *= -1;
+        }
+    }
     void Update()
     {
         x += speedX;
@@ -33,6 +45,17 @@ class Ball{
             x = screenWidth / 2.f;
             y = screenHeight / 2.f;
             speedX *= -1; // flips the direction so it's not boring
+        }
+    }
+    void Score()
+    {
+        if (x <=0)
+        {
+            score2++;
+        }
+        else if (x >=screenWidth)
+        {
+            score1++;
         }
     }
 
@@ -51,21 +74,10 @@ class Paddle
     {
         DrawRectangle(x, y, width, height, WHITE);
     }
-    void Clamp()
-    {
-        if (y < 0)
-        {
-            y = 0;
-        }
-        else if (y > screenHeight - height)
-        {
-            y = screenHeight - height;
-        }
-    }
     void Update()
     {
         //user input
-        if (player1)
+        if (!player1)
         {
             if (IsKeyDown(KEY_UP))
             {
@@ -87,6 +99,15 @@ class Paddle
             {
                 y += speed;
             }
+        }
+        // clamps the paddles
+        if (y < 0)
+        {
+            y = 0;
+        }
+        else if (y > screenHeight - height)
+        {
+            y = screenHeight - height;
         }
     }
 };
@@ -112,29 +133,11 @@ int main()
 
         //update
         paddle1.Update();
-        paddle1.Clamp();
         paddle2.Update();
-        paddle2.Clamp();
         ball.Update();
 
-        if (ball.x <=0)
-        {
-            score2++;
-        }
-        else if (ball.x >=screenWidth)
-        {
-            score1++;
-        }
-
-        // this code is ass
-        if (CheckCollisionCircleRec(Vector2{ball.x, ball.y}, ball.radius, Rectangle{paddle1.x, paddle1.y, paddle1.width, paddle1.height}))
-        {
-            ball.speedX *= -1;
-        }
-        else if (CheckCollisionCircleRec(Vector2{ball.x, ball.y}, ball.radius, Rectangle{paddle2.x, paddle2.y, paddle2.width, paddle2.height}))
-        {
-            ball.speedX *= -1;
-        }
+        ball.CollisionDetection(Rectangle{paddle1.x, paddle1.y, paddle1.width, paddle1.height});
+        ball.CollisionDetection(Rectangle{paddle2.x, paddle2.y, paddle2.width, paddle2.height});
 
         //draw
         DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, WHITE);
